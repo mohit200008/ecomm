@@ -15,7 +15,9 @@ const Cart = () => {
     const handleCheckout = async () => {
         const stripe = await getStripe();
     
-        const response = await fetch('/api/stripe', {
+        const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'
+
+        const response = await fetch(`${apiBase}/api/payment/create-session`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -23,13 +25,16 @@ const Cart = () => {
           body: JSON.stringify(cartItems),
         });
     
-        if(response.statusCode === 500) return;
+        if (!response.ok) {
+          toast.error('Checkout failed. Please try again.');
+          return;
+        }
         
         const data = await response.json();
     
         toast.loading('Redirecting...');
     
-        stripe.redirectToCheckout({ sessionId: data.id });
+        stripe.redirectToCheckout({ sessionId: data.sessionId });
       }
     return (
         <div className="cart-wrapper" ref={cartRef}>

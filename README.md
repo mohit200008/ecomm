@@ -1,97 +1,207 @@
-# E-commerce app (Next.js + Spring Boot + MySQL + Stripe)
+# 🛒 E-Commerce Store (Next.js + Spring Boot + MySQL + Stripe)
 
-A simple e-commerce storefront with:
-- Product listing and product detail pages
-- Client-side cart (add/remove/update quantity)
-- Stripe Checkout payment flow
+A full-stack e-commerce application built with a modern frontend and a scalable Java backend.
+This project demonstrates a **real-world migration from a CMS-based system to a fully backend-driven architecture**.
 
-This repo is the result of a phased migration from a CMS-driven catalog to a fully backend-driven system.
+---
 
-## Architecture (high level)
+## ✨ Features
 
-- **Frontend**: Next.js (Pages Router) on `http://localhost:3000`
-- **Backend**: Spring Boot REST API on `http://localhost:8080`
-- **Database**: MySQL (products table)
-- **Payments**: Stripe Checkout session creation handled by the Spring backend
+* 🛍️ Product Listing & Detail Pages
+* 🛒 Client-side Cart (add/remove/update quantity)
+* 💳 Stripe Checkout Integration (secure payments)
+* ⚡ Backend-driven Product Catalog (Spring Boot + MySQL)
+* 🔄 Clean Migration Architecture (CMS → Backend)
+* 🎯 Responsive UI with smooth user experience
 
-## Tech stack
+---
 
-- **Frontend**: Next.js 12, React 17, React Context (cart), `@stripe/stripe-js`
-- **Backend**: Java (Spring Boot), Spring Web, Spring Data JPA, Lombok
-- **Database**: MySQL 8
-- **Payments**: Stripe (server-side session creation via `stripe-java`)
-
-## API endpoints (backend)
-
-- **Health**: `GET /api/health`
-- **Products**: `GET /api/products`
-- **Stripe**: `POST /api/payment/create-session`
-
-## Local setup
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js + npm
-- JDK 17+ and Maven
-- MySQL 8 running locally
-- Stripe test keys
+* Node.js (v14+)
+* npm or yarn
+* JDK 17+
+* Maven
+* MySQL 8
+* Stripe test keys
 
-### 1) Configure frontend env
+---
 
-Create a `.env` from `.env.example` in the repo root:
+## ⚙️ Installation
+
+### 1️⃣ Clone the repository
 
 ```bash
-copy .env.example .env
+git clone https://github.com/mohit200008/ecommerce.git
+cd ecommerce
 ```
 
-Set:
-- `NEXT_PUBLIC_API_BASE_URL` (default: `http://localhost:8080`)
-- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+---
 
-### 2) Start the backend (Spring Boot)
+### 2️⃣ Configure Frontend
 
-In PowerShell:
+Create `.env` file:
 
-```powershell
-$env:SPRING_DATASOURCE_PASSWORD="root123"   # change to your MySQL password
-$env:STRIPE_SECRET_KEY="sk_test_..."        # your Stripe secret key (server-side)
+```bash
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+```
 
-cd "backend"
+---
+
+### 3️⃣ Start Backend (Spring Boot)
+
+```bash
+cd backend
+
+# Set environment variables
+setx SPRING_DATASOURCE_PASSWORD your_mysql_password
+setx STRIPE_SECRET_KEY your_stripe_secret_key
+
 mvn spring-boot:run
 ```
 
-Backend should be available at:
-- `http://localhost:8080/api/health`
-- `http://localhost:8080/api/products`
+Backend runs on:
 
-### 3) Start the frontend (Next.js)
+```
+http://localhost:8080/api/health
+http://localhost:8080/api/products
+```
 
-In another terminal:
+---
+
+### 4️⃣ Start Frontend (Next.js)
 
 ```bash
 npm install --legacy-peer-deps
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+Open:
 
-## How a new user can interact with the app
+```
+http://localhost:3000
+```
 
-- **Browse products** on the home page
-- **Open a product** to see details
-- **Add to cart** and adjust quantities
-- **Checkout** using Stripe (test mode)
+---
 
-## Contributing (open source)
+## 📱 How to Use
 
-Contributions are welcome.
+* Browse products on the homepage
+* Click a product to view details
+* Add items to cart and update quantity
+* Proceed to checkout using Stripe (test mode)
 
-- **Fork** the repo and create a feature branch
-- Make small, focused commits
-- Open a PR with a clear description and screenshots (UI changes)
+---
 
-Suggested areas:
-- Add a real `/canceled` page for Stripe cancel flow
-- Improve error handling and loading states
-- Add CRUD admin APIs for products
-- Add tests (backend + frontend)
+## 🏗️ Architecture
+
+```text
+Next.js (Frontend)
+   ↓
+Spring Boot (Backend API)
+   ↓
+MySQL (Database)
+   ↓
+Stripe (Payments)
+```
+
+---
+
+## 🔧 Tech Stack
+
+### Frontend
+
+* Next.js (Pages Router)
+* React Context (Cart State)
+* Tailwind CSS
+* @stripe/stripe-js
+
+### Backend
+
+* Java 17
+* Spring Boot
+* Spring Data JPA
+* Lombok
+
+### Database
+
+* MySQL 8
+
+### Payments
+
+* Stripe (Checkout Sessions via backend)
+
+---
+
+## 🔌 API Endpoints
+
+### Health Check
+
+```
+GET /api/health
+```
+
+### Products
+
+```
+GET /api/products
+```
+
+### Payment
+
+```
+POST /api/payment/create-session
+```
+
+---
+
+## 🧠 System Design Highlights
+
+* 🔄 Migrated from CMS-based data to backend-driven architecture
+* 🧩 Decoupled frontend and backend using REST APIs
+* 🔐 Secure payment handling via server-side Stripe integration
+* 📦 Clean Git practices (removed unused dependencies like CMS)
+
+---
+
+## 🧪 Testing
+
+* Verify backend:
+
+```
+http://localhost:8080/api/health
+```
+
+* Verify products:
+
+```
+http://localhost:8080/api/products
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome!
+
+* Fork the repo
+* Create a feature branch
+* Make focused commits
+* Open a PR with description
+
+---
+
+## 👨‍💻 Author
+
+**Mohit Lamba**
+
+* GitHub: https://github.com/mohit200008
+
+---
+
+## ⭐ Support
+
+If you find this project useful, consider giving it a ⭐ on GitHub!

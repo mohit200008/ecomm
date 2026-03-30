@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { AiOutlineMinus, AiOutlinePlus, AiFillStar, AiOutlineStar } from 'react-icons/ai';
 
-import { client, urlFor } from '../../lib/client';
+import { client } from '../../lib/client';
+import { fetchProductsFromBackend, getProductGalleryUrls, mapBackendProduct } from '../../lib/productUtils';
 import { Product } from '../../components';
 import { useStateContext } from '../../context/StateContext';
 
 const ProductDetails = ({ product, products }) => {
-  const { image, name, details, price } = product;
+  const { name, details, price } = product;
+  const galleryUrls = getProductGalleryUrls(product);
   const [index, setIndex] = useState(0);
   const { decQty, incQty, qty, onAdd, setShowCart } = useStateContext();
 
@@ -21,13 +23,13 @@ const ProductDetails = ({ product, products }) => {
       <div className="product-detail-container">
         <div>
           <div className="image-container">
-            <img src={urlFor(image && image[index])} className="product-detail-image" />
+            <img src={galleryUrls[index] || ''} className="product-detail-image" />
           </div>
           <div className="small-images-container">
-            {image?.map((item, i) => (
+            {galleryUrls.map((src, i) => (
               <img 
                 key={i}
-                src={urlFor(item)}
+                src={src}
                 className={i === index ? 'small-image selected-image' : 'small-image'}
                 onMouseEnter={() => setIndex(i)}
               />
@@ -90,12 +92,29 @@ export const getStaticPaths = async () => {
   `;
 
   const products = await client.fetch(query);
+  const pathSet = new Set();
 
-  const paths = products.map((product) => ({
-    params: { 
-      slug: product.slug.current
+  const paths = [];
+  for (const product of products) {
+    const slug = product.slug.current;
+    if (slug && !pathSet.has(slug)) {
+      pathSet.add(slug);
+      paths.push({ params: { slug } });
     }
-  }));
+  }
+
+  try {
+    const raw = await fetchProductsFromBackend();
+    for (const p of raw) {
+      const slug = String(p.id);
+      if (!pathSet.has(slug)) {
+        pathSet.add(slug);
+        paths.push({ params: { slug } });
+      }
+    }
+  } catch (_) {
+    /* backend optional at build time */
+  }
 
   return {
     paths,
@@ -104,16 +123,31 @@ export const getStaticPaths = async () => {
 }
 
 export const getStaticProps = async ({ params: { slug }}) => {
-  const query = `*[_type == "product" && slug.current == '${slug}'][0]`;
   const productsQuery = '*[_type == "product"]'
-  
-  const product = await client.fetch(query);
-  const products = await client.fetch(productsQuery);
+  const sanityQuery = `*[_type == "product" && slug.current == '${slug}'][0]`;
 
-  console.log(product);
+  let product = await client.fetch(sanityQuery);
+  let products = await client.fetch(productsQuery);
+
+  if (!product) {
+    try {
+      const raw = await fetchProductsFromBackend();
+      const match = raw.find((p) => String(p.id) === slug);
+      if (match) {
+        product = mapBackendProduct(match);
+        products = raw.map(mapBackendProduct);
+      }
+    } catch (err) {
+      console.warn('Product page backend fallback failed:', err.message);
+    }
+  }
+
+  if (!product) {
+    return { notFound: true };
+  }
 
   return {
-    props: { products, product }
+    props: { products, product },
   }
 }
 

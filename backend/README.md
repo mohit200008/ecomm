@@ -1,6 +1,6 @@
 # Ecommerce backend (Spring Boot)
 
-Phase 1: standalone API with a health check. No database or Stripe yet.
+Phase 2: health check + **mock** `GET /api/products` (no DB yet). Stripe stays on Next.js for now.
 
 ## Prerequisites
 
@@ -31,6 +31,12 @@ GET http://localhost:8080/api/health
 ```
 
 Expected JSON body: `{"status":"Backend is running"}`
+
+```text
+GET http://localhost:8080/api/products
+```
+
+Returns a JSON array of products (mock data from `ProductService`).
 
 ## Notes
 

@@ -1,5 +1,7 @@
 import Stripe from 'stripe';
 
+import { stripeLineItemImageUrl } from '../../lib/productUtils';
+
 const stripe = new Stripe('sk_test_51IwoBgSHiDEFfnV9SIMpvGhCGY6AmWwKHopku8wb8Iav2GjmJdDUFBz2W2KGBJJaSXh9ilu9W2rI4LAbfHfwDzbM004hxkalte');
 
 export default async function handler(req, res) {
@@ -14,16 +16,18 @@ export default async function handler(req, res) {
           { shipping_rate: 'shr_1LcaIOSHiDEFfnV91fZfW98q' },
         ],
         line_items: req.body.map((item) => {
-          const img = item.image[0].asset._ref;
-          const newImage = img.replace('image-', 'https://cdn.sanity.io/images/vfxfwnaw/production/').replace('-webp', '.webp');
+          const newImage = stripeLineItemImageUrl(item);
+          const productData = {
+            name: item.name,
+          };
+          if (newImage) {
+            productData.images = [newImage];
+          }
 
           return {
             price_data: { 
               currency: 'inr',
-              product_data: { 
-                name: item.name,
-                images: [newImage],
-              },
+              product_data: productData,
               unit_amount: item.price * 100,
             },
             adjustable_quantity: {

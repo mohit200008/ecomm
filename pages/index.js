@@ -2,6 +2,7 @@ import React from 'react'
 
 import { Product, FooterBanner, HeroBanner } from '../components'
 import { client } from '../lib/client'
+import { fetchProductsFromBackend, mapBackendProduct } from '../lib/productUtils'
 
 const Home = ({ products, bannerData }) => {
   return (
@@ -26,15 +27,22 @@ const Home = ({ products, bannerData }) => {
 }
 
 export const getServerSideProps = async () => {
-     const query = '*[_type == "product"]';
-     const products = await client.fetch(query);
+  const bannerQuery = '*[_type == "banner"]'
+  const bannerData = await client.fetch(bannerQuery)
 
-     const bannerQuery = '*[_type == "banner"]';
-     const bannerData = await client.fetch(bannerQuery);
+  let products
+  try {
+    const raw = await fetchProductsFromBackend()
+    products = raw.map(mapBackendProduct)
+  } catch (err) {
+    console.warn('Backend products unavailable, using Sanity:', err.message)
+    const query = '*[_type == "product"]'
+    products = await client.fetch(query)
+  }
 
-     return {
-       props: { products, bannerData }
-     }
+  return {
+    props: { products, bannerData },
+  }
 }
 
 export default Home

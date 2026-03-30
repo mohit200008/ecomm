@@ -1,34 +1,97 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# E-commerce app (Next.js + Spring Boot + MySQL + Stripe)
 
-## Getting Started
+A simple e-commerce storefront with:
+- Product listing and product detail pages
+- Client-side cart (add/remove/update quantity)
+- Stripe Checkout payment flow
 
-First, run the development server:
+This repo is the result of a phased migration from a CMS-driven catalog to a fully backend-driven system.
+
+## Architecture (high level)
+
+- **Frontend**: Next.js (Pages Router) on `http://localhost:3000`
+- **Backend**: Spring Boot REST API on `http://localhost:8080`
+- **Database**: MySQL (products table)
+- **Payments**: Stripe Checkout session creation handled by the Spring backend
+
+## Tech stack
+
+- **Frontend**: Next.js 12, React 17, React Context (cart), `@stripe/stripe-js`
+- **Backend**: Java (Spring Boot), Spring Web, Spring Data JPA, Lombok
+- **Database**: MySQL 8
+- **Payments**: Stripe (server-side session creation via `stripe-java`)
+
+## API endpoints (backend)
+
+- **Health**: `GET /api/health`
+- **Products**: `GET /api/products`
+- **Stripe**: `POST /api/payment/create-session`
+
+## Local setup
+
+### Prerequisites
+
+- Node.js + npm
+- JDK 17+ and Maven
+- MySQL 8 running locally
+- Stripe test keys
+
+### 1) Configure frontend env
+
+Create a `.env` from `.env.example` in the repo root:
 
 ```bash
-npm run dev
-# or
-yarn dev
+copy .env.example .env
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Set:
+- `NEXT_PUBLIC_API_BASE_URL` (default: `http://localhost:8080`)
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+### 2) Start the backend (Spring Boot)
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+In PowerShell:
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+```powershell
+$env:SPRING_DATASOURCE_PASSWORD="root123"   # change to your MySQL password
+$env:STRIPE_SECRET_KEY="sk_test_..."        # your Stripe secret key (server-side)
 
-## Learn More
+cd "backend"
+mvn spring-boot:run
+```
 
-To learn more about Next.js, take a look at the following resources:
+Backend should be available at:
+- `http://localhost:8080/api/health`
+- `http://localhost:8080/api/products`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 3) Start the frontend (Next.js)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+In another terminal:
 
-## Deploy on Vercel
+```bash
+npm install --legacy-peer-deps
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Open `http://localhost:3000`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## How a new user can interact with the app
+
+- **Browse products** on the home page
+- **Open a product** to see details
+- **Add to cart** and adjust quantities
+- **Checkout** using Stripe (test mode)
+
+## Contributing (open source)
+
+Contributions are welcome.
+
+- **Fork** the repo and create a feature branch
+- Make small, focused commits
+- Open a PR with a clear description and screenshots (UI changes)
+
+Suggested areas:
+- Add a real `/canceled` page for Stripe cancel flow
+- Improve error handling and loading states
+- Add CRUD admin APIs for products
+- Add tests (backend + frontend)

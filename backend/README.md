@@ -1,11 +1,17 @@
 # Ecommerce backend (Spring Boot)
 
-Phase 2: health check + **mock** `GET /api/products` (no DB yet). Stripe stays on Next.js for now.
+REST API: health check, products from **MySQL** via JPA. On first empty database, two sample rows are inserted (`DataLoader`).
 
 ## Prerequisites
 
-- **JDK 17** (or newer LTS)
-- **Apache Maven 3.9+** (or use your IDE’s built-in Maven)
+- **JDK 17+**
+- **Apache Maven 3.9+**
+- **MySQL 8** running locally (or point `SPRING_DATASOURCE_URL` at your instance)
+
+## MySQL
+
+1. Ensure MySQL is running (default URL creates schema `ecommerce` if allowed: `createDatabaseIfNotExist=true`).
+2. Adjust credentials if needed via env (see `env.example`) or edit `application.properties` defaults (`root` / empty password).
 
 ## Run
 
@@ -15,7 +21,7 @@ From this `backend` folder:
 mvn spring-boot:run
 ```
 
-Or build then run the JAR:
+Or:
 
 ```bash
 mvn -DskipTests package
@@ -24,20 +30,19 @@ java -jar target/ecommerce-backend-0.0.1-SNAPSHOT.jar
 
 ## Verify
 
-Open or call:
-
 ```text
 GET http://localhost:8080/api/health
 ```
 
-Expected JSON body: `{"status":"Backend is running"}`
+→ `{"status":"Backend is running"}`
 
 ```text
 GET http://localhost:8080/api/products
 ```
 
-Returns a JSON array of products (mock data from `ProductService`).
+→ JSON array from table `products` (seeded once if empty).
 
-## Notes
+## Configuration
 
-- JPA and MySQL are on the classpath for later phases; **DataSource auto-configuration is disabled** until you configure MySQL (Phase 4). Remove the `spring.autoconfigure.exclude` entries in `application.properties` when you add the datasource.
+- `application.properties`: datasource + `spring.jpa.hibernate.ddl-auto=update` (dev-friendly; use migrations for production).
+- Optional env vars: `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`.

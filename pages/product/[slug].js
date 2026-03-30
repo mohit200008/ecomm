@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { AiOutlineMinus, AiOutlinePlus, AiFillStar, AiOutlineStar } from 'react-icons/ai';
 
-import { client } from '../../lib/client';
 import { fetchProductsFromBackend, getProductGalleryUrls, mapBackendProduct } from '../../lib/productUtils';
 import { Product } from '../../components';
 import { useStateContext } from '../../context/StateContext';
@@ -83,72 +82,16 @@ const ProductDetails = ({ product, products }) => {
   )
 }
 
-export const getStaticPaths = async () => {
-  const query = `*[_type == "product"] {
-    slug {
-      current
-    }
-  }
-  `;
+export const getServerSideProps = async ({ params: { slug } }) => {
+  const rawProducts = await fetchProductsFromBackend();
+  const products = rawProducts.map(mapBackendProduct);
 
-  const products = await client.fetch(query);
-  const pathSet = new Set();
+  // Frontend routes use `slug.current`, which for backend products is `String(id)`.
+  const rawProduct = rawProducts.find((p) => String(p.id) === String(slug));
+  if (!rawProduct) return { notFound: true };
 
-  const paths = [];
-  for (const product of products) {
-    const slug = product.slug.current;
-    if (slug && !pathSet.has(slug)) {
-      pathSet.add(slug);
-      paths.push({ params: { slug } });
-    }
-  }
-
-  try {
-    const raw = await fetchProductsFromBackend();
-    for (const p of raw) {
-      const slug = String(p.id);
-      if (!pathSet.has(slug)) {
-        pathSet.add(slug);
-        paths.push({ params: { slug } });
-      }
-    }
-  } catch (_) {
-    /* backend optional at build time */
-  }
-
-  return {
-    paths,
-    fallback: 'blocking'
-  }
-}
-
-export const getStaticProps = async ({ params: { slug }}) => {
-  const productsQuery = '*[_type == "product"]'
-  const sanityQuery = `*[_type == "product" && slug.current == '${slug}'][0]`;
-
-  let product = await client.fetch(sanityQuery);
-  let products = await client.fetch(productsQuery);
-
-  if (!product) {
-    try {
-      const raw = await fetchProductsFromBackend();
-      const match = raw.find((p) => String(p.id) === slug);
-      if (match) {
-        product = mapBackendProduct(match);
-        products = raw.map(mapBackendProduct);
-      }
-    } catch (err) {
-      console.warn('Product page backend fallback failed:', err.message);
-    }
-  }
-
-  if (!product) {
-    return { notFound: true };
-  }
-
-  return {
-    props: { products, product },
-  }
-}
+  const product = mapBackendProduct(rawProduct);
+  return { props: { products, product } };
+};
 
 export default ProductDetails

@@ -1,14 +1,36 @@
 import React from 'react'
 
 import { Product, FooterBanner, HeroBanner } from '../components'
-import { client } from '../lib/client'
 import { fetchProductsFromBackend, mapBackendProduct } from '../lib/productUtils'
 
-const Home = ({ products, bannerData }) => {
+const Home = ({ products }) => {
+  // Temporarily hardcoded banners (Step 4 option A).
+  const heroBanner = {
+    smallText: 'Beats Solo',
+    midText: 'Summer Sale',
+    largeText1: 'Bass',
+    product: '1',
+    buttonText: 'Shop Now',
+    desc: 'Get the best deals on speakers',
+    imageUrl: 'https://placehold.co/1200x600/png?text=Summer+Sale',
+  }
+
+  const footerBanner = {
+    discount: '25%',
+    largeText1: 'Bass',
+    largeText2: 'Loaded',
+    saleTime: '28Aug to 10 Sep',
+    smallText: 'Music felt amazing',
+    midText: 'Summer Sale',
+    product: '2',
+    buttonText: "Let's get started",
+    desc: 'Best headphones in the market',
+    imageUrl: 'https://placehold.co/1200x600/png?text=Best+Headphones',
+  }
+
   return (
     <div>
-      <HeroBanner heroBanner={bannerData.length && bannerData[0]} />
-      {console.log(bannerData)}
+      <HeroBanner heroBanner={heroBanner} />
       <div className="products-heading">
          <h2>Best Selling Products</h2>
          <p>Speakers of many variations</p>
@@ -21,27 +43,17 @@ const Home = ({ products, bannerData }) => {
               )}
       </div>
 
-      <FooterBanner footerBanner={bannerData && bannerData[0]}  />
+      <FooterBanner footerBanner={footerBanner} />
     </div>
   )
 }
 
 export const getServerSideProps = async () => {
-  const bannerQuery = '*[_type == "banner"]'
-  const bannerData = await client.fetch(bannerQuery)
-
-  let products
-  try {
-    const raw = await fetchProductsFromBackend()
-    products = raw.map(mapBackendProduct)
-  } catch (err) {
-    console.warn('Backend products unavailable, using Sanity:', err.message)
-    const query = '*[_type == "product"]'
-    products = await client.fetch(query)
-  }
+  const raw = await fetchProductsFromBackend()
+  const products = raw.map(mapBackendProduct)
 
   return {
-    props: { products, bannerData },
+    props: { products },
   }
 }
 

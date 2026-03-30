@@ -18,7 +18,10 @@ const FooterBanner = ({ footerBanner }) => {
   } = footerBanner
 
   return (
-    <div className="footer-banner-container">
+    <div
+      className="footer-banner-container"
+      style={imageUrl ? { '--banner-image': `url(${imageUrl})` } : undefined}
+    >
        <div className="banner-desc">
           <div className="left">
             <p>{discount}</p>
@@ -34,11 +37,6 @@ const FooterBanner = ({ footerBanner }) => {
              <button type="button">{buttonText}</button>
             </Link>
           </div>
-
-          <img 
-            src={imageUrl}
-            className="footer-banner-image"
-          />
        </div>
     </div>
   )
